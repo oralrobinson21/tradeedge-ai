@@ -1,0 +1,25 @@
+version: "0.5"
+
+processes:
+  backend:
+    command: node backend/server.js
+    working_dir: .
+    ready_log_line: "Backend running on http://0.0.0.0:5000"
+    depends_on: {}
+
+  expo:
+    command: bash -c "EXPO_PACKAGER_PROXY_URL=https://$REPLIT_DEV_DOMAIN REACT_NATIVE_PACKAGER_HOSTNAME=$REPLIT_DEV_DOMAIN npx expo start --port 19006"
+    working_dir: .
+    depends_on:
+      backend:
+        condition: process_healthy
+
+  proxy:
+    command: node proxy-server.js
+    working_dir: .
+    ready_log_line: "Proxy running"
+    depends_on:
+      backend:
+        condition: process_healthy
+      expo:
+        condition: process_started
